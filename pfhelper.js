@@ -78,7 +78,7 @@ client.on("message", (message) => {
 				}
 				
 				if (i < results.length - 1) {
-					if (penalty) {
+					if (penalty && (i == results.length - 2)) {
 						response += "    -    ";
 					} else {
 						response += "    +    ";
