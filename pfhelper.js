@@ -13,10 +13,6 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
-	
-});
-
-client.on("message", (message) => {
 	if (message.author.bot) {
 		return;
 	}
