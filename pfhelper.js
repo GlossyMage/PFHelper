@@ -5,6 +5,9 @@ const config = require("./config.json");
 const fs = require("fs");
 const token = require("./token.json");
 
+var dice = require("./dice.js");
+var characters = require("./characters.js");
+
 
 client.login(token.token);
 
@@ -43,14 +46,14 @@ function commandBleep(message) {
 }
 
 function commandRoll(message) {
-	var dice = new RegExp(config.dice, 'g');
-	var negate = new RegExp(config.negate);
+	var diceRegex = new RegExp(config.dice, 'g');
+	var negateRegex = new RegExp(config.negate);
 
 	var rolls = [];
 	var m;
-	var penalty = negate.test(message.content);
+	var penalty = negateRegex.test(message.content);
 
-	while (m = dice.exec(message.content)) {
+	while (m = diceRegex.exec(message.content)) {
 		rolls.push(m);
 	}
 			
@@ -61,7 +64,7 @@ function commandRoll(message) {
 
 	var i = 0;
 	for (var i = 0; i < rolls.length; i++) {
-		var currentRoll = rollDice(rolls[i]);
+		var currentRoll = dice.rollDice(rolls[i]);
 		results.push(currentRoll);
 	}
 
@@ -99,23 +102,4 @@ function commandRoll(message) {
 	response = response + "    =    ***" + sum + "***";
 
 	message.channel.send(response);
-}
-
-function rollDice(input) {
-	if (!String(input).includes('d')) {
-		return parseInt(input);
-	}
-	
-	var numbers = String(input).split("d");
-	var results = []
-
-	for (var i = 0; i < numbers[0]; i++) {
-		results.push(getRandom(numbers[1]));
-	}
-
-	return results;
-}
-
-function getRandom(max) {
-	return Math.floor(Math.random() * max) + 1;
 }
