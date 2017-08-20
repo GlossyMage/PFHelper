@@ -25,7 +25,9 @@ client.on("message", (message) => {
 	if (message.content.toLowerCase().includes("bleep")) {
 		console.log("Bleeping detected.");
 		commandBleep(message);
-	} else if (message.content.startsWith(config.prefix + 'r')) {
+	}
+
+	if (message.content.startsWith(config.prefix + 'r')) {
 		var diceRoll = new RegExp(config.diceRoll, 'i');
 		
 		if (diceRoll.test(message.content)) {
