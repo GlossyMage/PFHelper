@@ -12,11 +12,15 @@ exports.attack = function (character) {
 
 	response += character.weapons[0].name + ":\n";
 
-	var attackBonus = this.getAbilityModifier(character.strength) + character.bab + character.weapons[0].hitBonus;
-	var damageBonus = this.getAbilityModifier(character.strength) + character.weapons[0].damageBonus;
+	var attackBonus = character.bab + character.weapons[0].hitBonus;
 
-	console.log("attackBonus = " + attackBonus);
-	console.log("damageBonus = " + damageBonus);
+	if (this.hasFeat(character, "weapon finesse")) {
+		attackBonus += this.getAbilityModifier(character.dexterity);
+	} else {
+		attackBonus += this.getAbilityModifier(character.strength);
+	}
+	
+	var damageBonus = this.getAbilityModifier(character.strength) + character.weapons[0].damageBonus;
 	
 	response += "Attack roll: ";
 	var attackRoll;
@@ -53,3 +57,13 @@ exports.getAC = function (character) {
 exports.getAbilityModifier = function (ability) {
 	return Math.floor((ability - 10) / 2);
 };
+
+exports.hasFeat = function (character, feat) {
+	for (var i = 0; i < character.feats.length; i++) {
+		if (character.feats[i] === feat) {
+			return true;
+		}
+	}
+
+	return false;
+}
