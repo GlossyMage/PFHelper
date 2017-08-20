@@ -1,6 +1,6 @@
 const dice = require("./dice.js");
 
-module.exports = {};
+var exports = module.exports = {};
 
 exports.attack = function (character) {
 	var response = character.name + " attacks with ";
@@ -10,15 +10,44 @@ exports.attack = function (character) {
 		response += "his ";
 	}
 
-	if (character.weapons.length == 0) {
-		response += "bare fists:";
+	response += character.weapons[0].name + ":\n";
+
+	var attackBonus = this.getAbilityModifier(character.strength) + character.bab + character.weapons[0].hitBonus;
+	var damageBonus = this.getAbilityModifier(character.strength) + character.weapons[0].damageBonus;
+
+	console.log("attackBonus = " + attackBonus);
+	console.log("damageBonus = " + damageBonus);
+	
+	response += "Attack roll: ";
+	var attackRoll;
+
+	if (attackBonus >= 0) {
+		attackRoll = dice.parseRoll("1d20 + " + attackBonus);
 	} else {
-		response += character.weapons[0].name + ":";
+		attackRoll = dice.parseRoll("1d20 - " + attackBonus);
 	}
+
+	console.log("attackRoll = " + attackRoll);
+
+	response += dice.formatRoll(attackRoll) + "\n";
+
+	response += "Damage roll: ";
+
+	var damageRoll;
+
+	if (damageBonus >= 0) {
+		damageRoll = dice.parseRoll(character.weapons[0].damage + " + " + damageBonus);
+	} else {
+		damageRoll = dice.parseRoll(character.weapons[0].damage + " - " + damageBonus);
+	}
+
+	response += dice.formatRoll(damageRoll);
+
+	return response;
 };
 
 exports.getAC = function (character) {
-	return 10 + getAbilityModifier(character.dexterity) + character.armour.bonus;
+	return 10 + this.getAbilityModifier(character.dexterity) + character.armour.bonus;
 };
 
 exports.getAbilityModifier = function (ability) {
