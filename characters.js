@@ -14,7 +14,7 @@ exports.attack = function (character) {
 
 	var attackBonus = character.bab + character.weapons[0].hitBonus;
 
-	if (this.hasFeat(character, "weapon finesse")) {
+	if (this.hasFeat(character, "weapon finesse") && character.weapons[0].finesse) {
 		attackBonus += this.getAbilityModifier(character.dexterity);
 	} else {
 		attackBonus += this.getAbilityModifier(character.strength);
