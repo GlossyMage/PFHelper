@@ -11,5 +11,11 @@ The token.json file is missing from this repository. This is intentional.
 To run this bot, add your own token.json file containing the following:
 
 {
-	"token": [your token here]
+	"token": [your token here],
+	"prefix": "!"
 }
+
+Note: If you want to run this bot on a server that has other bots, you may want to change the prefix to something else, for instance "pf!", in order to prevent PFHelper from picking up messages meant for other bots.
+
+
+The characters.json file is not included in the repository because it is a temporary way to get character information until support for Google Sheets can be implemented.
