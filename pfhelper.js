@@ -6,6 +6,7 @@ const characterSheets = require("./characters.json");
 const fs = require("fs");
 const token = require("./token.json");
 
+var s = require("./sheetreader.js");
 var dice = require("./dice.js");
 var c = require("./characters.js");
 
@@ -43,6 +44,8 @@ client.on("message", (message) => {
 		commandBind(message);
 	} else if (message.content.startsWith(config.prefix + "unbind ")) {
 		commandUnbind(message);
+	} else if (message.content.startsWith(config.prefix + "sheets")) {
+		commandSheets(message);
 	}
 });
 
@@ -65,6 +68,16 @@ function commandRoll(message) {
 
 	message.channel.send(response).catch(function () {
 		message.channel.send("Why would you need to roll that many dice? If you absolutely must, break the roll up into several messages.");
+	});
+}
+
+function commandSheets(message) {
+	s.getAbilityScores().then((results) => {
+		var response = "Ability scores:\n";
+		for (var i = 0; i < results.values.length; i++) {
+			response += results.values[i][0] + ": " + results.values[i][1] + "\n";
+		}
+		message.channel.send(response);
 	});
 }
 

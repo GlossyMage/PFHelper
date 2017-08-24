@@ -1,3 +1,4 @@
+const readFile = require('fs-readfile-promise');
 var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
@@ -7,39 +8,42 @@ var SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'sheets.googleapis.com-nodejs-readedit.json';
 
-module.exports = {};
+var exports = module.exports = {};
 
-exports.getAbilityScores = function() {
-	fs.readFile('client_secret.json', function processClientSecrets(err, content) {
-		if (err) {
-			console.log("Error handling client secret file: " + err);
-			return;
-		}
+var auth;
 
-		authorize(JSON.parse(content), listStuff);
-	});
+exports.getAbilityScores = async function() {
+	const secret = await getClientSecret();
+	auth = await authorize(secret);
+	return await getCharacter(auth);
+};
+
+async function getClientSecret() {
+	try {
+		const content = await readFile('client_secret.json');
+		return JSON.parse(content);
+	} catch (err) {
+		console.log("Error handling client secret file: " + err);
+	}
 }
 
-exports.getAbilityScores();
-
-function authorize(credentials, callback) {
+async function authorize(credentials) {
     var clientSecret = credentials.installed.client_secret;
     var clientId = credentials.installed.client_id;
     var redirectUrl = credentials.installed.redirect_uris[0];
     var auth = new googleAuth();
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-    fs.readFile(TOKEN_PATH, function(err, token) {
-        if (err) {
-            getNewToken(oauth2Client, callback);
-        } else {
-            oauth2Client.credentials = JSON.parse(token);
-            callback(oauth2Client);
-        }
-    });
+	try {
+		const token = await readFile(TOKEN_PATH);
+		oauth2Client.credentials = JSON.parse(token);
+		return oauth2Client;
+	} catch (err) {
+		return getNewToken(oauth2Client);
+	}
 }
 
-function getNewToken(oauth2Client, callback) {
+function getNewToken(oauth2Client) {
     var authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES
@@ -61,7 +65,8 @@ function getNewToken(oauth2Client, callback) {
             }
             oauth2Client.credentials = token;
             storeToken(token);
-            callback(oauth2Client);
+            return oauth2Client;
+            //callback(oauth2Client);
         });
     });
 }
@@ -79,32 +84,45 @@ function storeToken(token) {
     console.log('Token stored to ' + TOKEN_PATH);
 }
 
-var scores = "blerp";
+async function getCharacter(auth) {
+	const response = await getSheetsValues({
+		auth: auth,
+		spreadsheetId: '1Nz-Zo6wDwg_BrCn65SwPjEtK3t0HikPo3zhsufTlWxY',
+		range: 'B4:C9',
+	});
 
-function listStuff(auth) {
-    var sheets = google.sheets('v4');
+	return response;
+
+	/*
+	var sheets = google.sheets('v4');
     sheets.spreadsheets.values.get({
-        auth: auth,
-        spreadsheetId: '1Nz-Zo6wDwg_BrCn65SwPjEtK3t0HikPo3zhsufTlWxY',
-        range: 'B4:C9',
-    }, function(err, response) {
-        if (err) {
-            console.log('The API returned an error: ' + err);
-            return;
-        }
-        var rows = response.values;
-        if (rows.length == 0) {
-            console.log('No data found.');
-        } else {
-            console.log('Column 1, Column 2:');
-            scores = rows;
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                console.log('%s, %s', row[0], row[1]);
-            }
-            console.log(scores);
-        }
+       	auth: auth,
+       	spreadsheetId: '1Nz-Zo6wDwg_BrCn65SwPjEtK3t0HikPo3zhsufTlWxY',
+       	range: 'B4:C9',
+    }, (err, response) => {
+       	if (err) {
+       	    reject();
+       	} else {
+       		var rows = response.values;
+       		if (rows.length == 0) {
+       		    console.log('No data found.');
+       		} else {
+       		    console.log(rows);
+       		}
+       	}
     });
+   */
+}
 
-    console.log(scores);
+function getSheetsValues(params) {
+	return new Promise((resolve, reject) => {
+		var sheets = google.sheets('v4');
+    	sheets.spreadsheets.values.get(params, (err, response) => {
+        	if (err) {
+        	    reject();
+        	} else {
+        		resolve(response);
+        	}
+    	});
+    });
 }
