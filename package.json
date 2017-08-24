@@ -1,0 +1,26 @@
+{
+  "name": "pfhelper",
+  "version": "1.0.0",
+  "description": "A Discord bot that helps you play Pathfinder.",
+  "main": "pfhelper.js",
+  "dependencies": {},
+  "devDependencies": {
+    "discord.js": "^11.1.0",
+    "fs-readfile-promise": "^3.0.0",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^20.2.0"
+  },
+  "scripts": {
+    "run": "node pfhelper.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glossymage/PFHelper.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/glossymage/PFHelper/issues"
+  },
+  "homepage": "https://github.com/glossymage/PFHelper#readme"
+}
