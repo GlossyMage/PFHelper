@@ -15,12 +15,12 @@ exports.attack = function (character) {
 	var attackBonus = character.bab + character.weapons[0].hitBonus;
 
 	if (this.hasFeat(character, "weapon finesse") && character.weapons[0].finesse) {
-		attackBonus += this.getAbilityModifier(character.dexterity);
+		attackBonus += this.getAbilityModifier(character.abilities.Dexterity);
 	} else {
-		attackBonus += this.getAbilityModifier(character.strength);
+		attackBonus += this.getAbilityModifier(character.abilities.Strength);
 	}
 	
-	var damageBonus = this.getAbilityModifier(character.strength) + character.weapons[0].damageBonus;
+	var damageBonus = this.getAbilityModifier(character.abilities.Strength) + character.weapons[0].damageBonus;
 	
 	response += "Attack roll: ";
 	var attackRoll;
@@ -51,7 +51,7 @@ exports.attack = function (character) {
 };
 
 exports.getAC = function (character) {
-	return 10 + this.getAbilityModifier(character.dexterity) + character.armour.bonus;
+	return 10 + this.getAbilityModifier(character.abilities.Dexterity) + character.armour.bonus;
 };
 
 exports.getAbilityModifier = function (ability) {
@@ -66,4 +66,10 @@ exports.hasFeat = function (character, feat) {
 	}
 
 	return false;
+}
+
+exports.skillCheck = function (character, skill) {
+	if (typeof character.skills[skill] != 'undefined') {
+		return dice.parseRoll("1d20 + " + character.skills[skill]);
+	}
 }

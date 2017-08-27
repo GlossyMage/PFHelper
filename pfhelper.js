@@ -10,6 +10,8 @@ var s = require("./sheetreader.js");
 var dice = require("./dice.js");
 var c = require("./characters.js");
 
+var hieronymus = 0;
+
 
 client.login(token.token);
 
@@ -28,15 +30,7 @@ client.on("message", (message) => {
 		commandBleep(message);
 	}
 
-	if (message.content.startsWith(config.prefix + 'r')) {
-		var diceRoll = new RegExp(config.diceRoll, 'i');
-		
-		if (diceRoll.test(message.content)) {
-			commandRoll(message);
-		} else {
-			message.channel.send("I didn't understand that dice roll, sorry.");
-		}
-	} else if (message.content.startsWith(config.prefix + "attack")) {
+	if (message.content.startsWith(config.prefix + "attack")) {
 		commandAttack(message);
 	} else if (message.content.startsWith(config.prefix + "getAC")) {
 		commandAC(message);
@@ -46,6 +40,16 @@ client.on("message", (message) => {
 		commandUnbind(message);
 	} else if (message.content.startsWith(config.prefix + "sheets")) {
 		commandSheets(message);
+	} else if (message.content.startsWith(config.prefix + "skill")) {
+		commandSkill(message);
+	} else if (message.content.startsWith(config.prefix + 'r')) {
+		var diceRoll = new RegExp(config.diceRoll, 'i');
+		
+		if (diceRoll.test(message.content)) {
+			commandRoll(message);
+		} else {
+			message.channel.send("I didn't understand that dice roll, sorry.");
+		}
 	}
 });
 
@@ -73,10 +77,17 @@ function commandRoll(message) {
 
 function commandSheets(message) {
 	s.getAbilityScores().then((results) => {
-		var response = "Ability scores:\n";
-		for (var i = 0; i < results.values.length; i++) {
-			response += results.values[i][0] + ": " + results.values[i][1] + "\n";
-		}
+
+		var response = "Stats for " + results.name + ":\n";
+		response += "Strength: " + results.abilities.Strength + "\n";
+		response += "Dexterity: " + results.abilities.Dexterity + "\n";
+		response += "Constitution: " + results.abilities.Constitution + "\n";
+		response += "Intellect: " + results.abilities.Intellect + "\n";
+		response += "Wisdom: " + results.abilities.Wisdom + "\n";
+		response += "Charisma: " + results.abilities.Charisma;
+
+		hieronymus = results;
+
 		message.channel.send(response);
 	});
 }
@@ -175,6 +186,26 @@ function commandAC(message) {
 	}
 	
 	var response = characterSheets[index].name + pronoun + " Armour Class is currently " + c.getAC(characterSheets[index]) + ".";
+	message.channel.send(response);
+}
+
+function commandSkill(message) {
+	if (hieronymus === 0) {
+		message.channel.send("Character not found. Please do !sheets first to make me prepare your character.");
+		return;
+	}
+	
+	var skill = message.content.split(" ")[1];
+	var response = "";
+
+	var check = c.skillCheck(hieronymus, message.content.split(" ")[1]);
+
+	if (check) {
+		response = hieronymus.name + " rolled " + skill + " check: " + dice.formatRoll(check);
+	} else {
+		response = "Skill \"" + skill + "\" not found.";
+	}
+
 	message.channel.send(response);
 }
 

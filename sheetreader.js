@@ -4,6 +4,8 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
+var characterBuilder = require('./characterBuilder.js');
+
 var SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'sheets.googleapis.com-nodejs-readedit.json';
@@ -15,7 +17,7 @@ var auth;
 exports.getAbilityScores = async function() {
 	const secret = await getClientSecret();
 	auth = await authorize(secret);
-	return await getCharacter(auth);
+	return await getCharacter(auth, '1qfG2RIj1OyTqB-AlG_bykBVFPzMW4StkRT__2Qhfoog');
 };
 
 async function getClientSecret() {
@@ -84,34 +86,24 @@ function storeToken(token) {
     console.log('Token stored to ' + TOKEN_PATH);
 }
 
-async function getCharacter(auth) {
+async function getAbilities(auth) {
 	const response = await getSheetsValues({
 		auth: auth,
 		spreadsheetId: '1Nz-Zo6wDwg_BrCn65SwPjEtK3t0HikPo3zhsufTlWxY',
-		range: 'B4:C9',
+		range: 'A3:B8',
 	});
 
 	return response;
+}
 
-	/*
-	var sheets = google.sheets('v4');
-    sheets.spreadsheets.values.get({
-       	auth: auth,
-       	spreadsheetId: '1Nz-Zo6wDwg_BrCn65SwPjEtK3t0HikPo3zhsufTlWxY',
-       	range: 'B4:C9',
-    }, (err, response) => {
-       	if (err) {
-       	    reject();
-       	} else {
-       		var rows = response.values;
-       		if (rows.length == 0) {
-       		    console.log('No data found.');
-       		} else {
-       		    console.log(rows);
-       		}
-       	}
-    });
-   */
+async function getCharacter(auth, sheetId) {
+	const response = await getSheetsValues({
+		auth: auth,
+		spreadsheetId: sheetId,
+		range: 'Data!A1:B239',
+	});
+
+	return characterBuilder.buildCharacter(response.values);
 }
 
 function getSheetsValues(params) {
