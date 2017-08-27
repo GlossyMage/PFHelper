@@ -14,10 +14,10 @@ var exports = module.exports = {};
 
 var auth;
 
-exports.getAbilityScores = async function() {
+exports.readSheet = async function(sheet) {
 	const secret = await getClientSecret();
 	auth = await authorize(secret);
-	return await getCharacter(auth, '1qfG2RIj1OyTqB-AlG_bykBVFPzMW4StkRT__2Qhfoog');
+	return await getCharacter(auth, sheet);
 };
 
 async function getClientSecret() {
@@ -86,24 +86,14 @@ function storeToken(token) {
     console.log('Token stored to ' + TOKEN_PATH);
 }
 
-async function getAbilities(auth) {
+async function getCharacter(auth, sheet) {
 	const response = await getSheetsValues({
 		auth: auth,
-		spreadsheetId: '1Nz-Zo6wDwg_BrCn65SwPjEtK3t0HikPo3zhsufTlWxY',
-		range: 'A3:B8',
+		spreadsheetId: sheet.id,
+		range: 'Data!A1:B241',
 	});
 
-	return response;
-}
-
-async function getCharacter(auth, sheetId) {
-	const response = await getSheetsValues({
-		auth: auth,
-		spreadsheetId: sheetId,
-		range: 'Data!A1:B239',
-	});
-
-	return characterBuilder.buildCharacter(response.values);
+	return characterBuilder.buildCharacter(response.values, sheet);
 }
 
 function getSheetsValues(params) {
